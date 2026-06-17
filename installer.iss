@@ -6,6 +6,10 @@
 #define AppPublisher "visual-alchemy"
 #define AppURL "https://github.com/visual-alchemy/obs-ads-insertion"
 
+#ifndef Config
+  #define Config "Release"
+#endif
+
 [Setup]
 AppName={#AppName}
 AppVersion={#AppVersion}
@@ -29,7 +33,7 @@ DisableProgramGroupPage=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "build_x64\Release\obs-auto-sf-fit.dll"; DestDir: "{app}\obs-plugins\64bit"; Flags: ignoreversion
+Source: "build_x64\{#Config}\obs-auto-sf-fit.dll"; DestDir: "{app}\obs-plugins\64bit"; Flags: ignoreversion
 Source: "data\ghost.png"; DestDir: "{app}\data\obs-plugins\obs-auto-sf-fit"; Flags: ignoreversion
 Source: "data\locale\en-US.ini"; DestDir: "{app}\data\obs-plugins\obs-auto-sf-fit\locale"; Flags: ignoreversion
 

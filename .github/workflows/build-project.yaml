@@ -112,6 +112,19 @@ jobs:
           config: ${{ needs.check-event.outputs.config }}
           package: ${{ fromJSON(needs.check-event.outputs.package) }}
 
+      - name: Build Installer 📦
+        run: |
+          # Build Setup Installer using Inno Setup
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DConfig=${{ needs.check-event.outputs.config }} installer.iss
+          
+          # Move setup file to release directory to be uploaded
+          $ProductName = "${{ steps.setup.outputs.pluginName }}"
+          $ProductVersion = "${{ steps.setup.outputs.pluginVersion }}"
+          $ReleaseDir = "${{ github.workspace }}/release"
+          
+          # Copy to release directory matching the file naming pattern
+          Move-Item -Path "Output\obs-auto-sf-fit-setup.exe" -Destination "$ReleaseDir\${ProductName}-${ProductVersion}-windows-x64.exe" -Force
+
       - name: Upload Artifacts 📡
         uses: actions/upload-artifact@v4
         with:
