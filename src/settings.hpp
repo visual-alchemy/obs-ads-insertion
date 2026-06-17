@@ -27,6 +27,7 @@ struct FilterSettings {
 	int hold_duration_ms;
 	int out_duration_ms;
 	bool render_sf_overlay;
+	bool preview_squeezed;
 
 	int cached_bbox_min_x;
 	int cached_bbox_min_y;
@@ -46,6 +47,7 @@ struct FilterSettings {
 		  hold_duration_ms(8000),
 		  out_duration_ms(1000),
 		  render_sf_overlay(true),
+		  preview_squeezed(false),
 		  cached_bbox_min_x(0),
 		  cached_bbox_min_y(0),
 		  cached_bbox_max_x(0),

@@ -14,6 +14,7 @@ void settings_load(FilterSettings *s, obs_data_t *data)
 	s->hold_duration_ms = (int)obs_data_get_int(data, "hold_duration_ms");
 	s->out_duration_ms = (int)obs_data_get_int(data, "out_duration_ms");
 	s->render_sf_overlay = obs_data_get_bool(data, "render_sf_overlay");
+	s->preview_squeezed = obs_data_get_bool(data, "preview_squeezed");
 }
 
 void settings_save(FilterSettings *s, obs_data_t *data)
@@ -30,6 +31,7 @@ void settings_save(FilterSettings *s, obs_data_t *data)
 	obs_data_set_int(data, "hold_duration_ms", s->hold_duration_ms);
 	obs_data_set_int(data, "out_duration_ms", s->out_duration_ms);
 	obs_data_set_bool(data, "render_sf_overlay", s->render_sf_overlay);
+	obs_data_set_bool(data, "preview_squeezed", s->preview_squeezed);
 
 	obs_data_set_int(data, "bbox_min_x", s->cached_bbox_min_x);
 	obs_data_set_int(data, "bbox_min_y", s->cached_bbox_min_y);
@@ -53,6 +55,7 @@ void settings_defaults(obs_data_t *data)
 	obs_data_set_default_int(data, "hold_duration_ms", 8000);
 	obs_data_set_default_int(data, "out_duration_ms", 1000);
 	obs_data_set_default_bool(data, "render_sf_overlay", true);
+	obs_data_set_default_bool(data, "preview_squeezed", false);
 
 	obs_data_set_default_int(data, "bbox_min_x", 0);
 	obs_data_set_default_int(data, "bbox_min_y", 0);
@@ -129,6 +132,8 @@ obs_properties_t *settings_properties(FilterSettings *s)
 
 	obs_properties_add_bool(props, "render_sf_overlay",
 				obs_module_text("RenderSfOverlay"));
+	obs_properties_add_bool(props, "preview_squeezed",
+				obs_module_text("PreviewSqueezed"));
 
 	return props;
 }

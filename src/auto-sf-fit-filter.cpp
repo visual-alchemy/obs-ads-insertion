@@ -356,6 +356,14 @@ static void get_transform(AutoSFFilter *f, float cx, float cy,
 		return;
 	}
 
+	if (f->settings.preview_squeezed) {
+		sx = f->transform.scale_x;
+		sy = f->transform.scale_y;
+		ox = f->transform.offset_x;
+		oy = f->transform.offset_y;
+		return;
+	}
+
 	if (!f->settings.enable_timing) {
 		sx = f->transform.scale_x;
 		sy = f->transform.scale_y;
@@ -559,20 +567,6 @@ static void filter_video_render(void *data, gs_effect_t *effect)
 			is_media = true;
 			duration = obs_source_media_get_duration(sf);
 			if (duration > 0) {
-				media_time = obs_source_media_get_time(sf);
-			}
-		}
-	}
-
-	if (f->settings.enable_timing && !obs_source_active(f->context)) {
-		if (f->phase == TimingPhase::IDLE) {
-			f->phase = TimingPhase::IN;
-			f->phase_start_time = 0;
-			f->activate_time = obs_get_video_frame_time();
-			f->media_has_reset = false;
-			f->needs_recalc = true;
-			if (sf && is_media) {
-				obs_source_media_restart(sf);
 				media_time = obs_source_media_get_time(sf);
 			}
 		}
