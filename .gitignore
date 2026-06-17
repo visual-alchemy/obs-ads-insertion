@@ -16,6 +16,9 @@
 !LICENSE
 !/README.md
 !/*.md
+!/installer.iss
+!/package.ps1
+
 
 # Exclude lock files
 *.lock.json
