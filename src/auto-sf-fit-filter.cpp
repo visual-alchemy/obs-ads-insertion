@@ -203,11 +203,13 @@ static void filter_activate(void *data)
 	f->needs_recalc = true;
 	f->media_has_reset = false;
 	f->startup_frames_logged = 0;
+	f->calibrated_this_hold = false;
 	f->activate_time = obs_get_video_frame_time();
 	if (f->settings.enable_timing) {
 		f->phase = TimingPhase::IN;
 		f->phase_start_time = 0;
 	}
+
 
 	if (f->sf_source_ref) {
 		obs_source_t *sf = obs_weak_source_get_source(f->sf_source_ref);
@@ -652,6 +654,20 @@ static void filter_video_render(void *data, gs_effect_t *effect)
 	float sf_sy = 1.0f;
 	float sf_opacity = 0.0f;
 	get_transform(f, (float)cx, (float)cy, media_time, duration, ox, oy, sx, sy, sf_ox, sf_oy, sf_sx, sf_sy, sf_opacity);
+
+	if (f->settings.enable_timing && f->phase == TimingPhase::HOLD && !f->calibrated_this_hold) {
+		if (do_recalc(f, true)) {
+			f->calibrated_this_hold = true;
+			f->needs_recalc = false;
+			f->transform = transform_calculate((int)cx, (int)cy,
+							   f->bbox.min_x, f->bbox.min_y,
+							   f->bbox.width(), f->bbox.height(),
+							   f->settings.fit_mode,
+							   f->settings.padding);
+			get_transform(f, (float)cx, (float)cy, media_time, duration, ox, oy, sx, sy, sf_ox, sf_oy, sf_sx, sf_sy, sf_opacity);
+		}
+	}
+
 
 	if (f->settings.enable_timing && f->startup_frames_logged < 120) {
 		uint32_t sf_w = sf ? obs_source_get_base_width(sf) : 0;

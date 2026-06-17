@@ -38,7 +38,7 @@
     },
     "name": "obs-auto-sf-fit",
     "displayName": "OBS Auto SF Fit",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": "OBS Auto SF Fit Developers",
     "website": "https://github.com/obs-auto-sf-fit",
     "email": "dev@obs-auto-sf-fit.local"

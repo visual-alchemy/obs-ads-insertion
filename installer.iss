@@ -2,7 +2,7 @@
 ; See https://jrsoftware.org/ishelp/ for details.
 
 #define AppName "OBS Auto SF Fit"
-#define AppVersion "1.0.0"
+#define AppVersion "1.0.1"
 #define AppPublisher "visual-alchemy"
 #define AppURL "https://github.com/visual-alchemy/obs-ads-insertion"
 

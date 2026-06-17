@@ -22,6 +22,7 @@ struct AutoSFFilter {
 	bool in_render;
 	bool media_has_reset;
 	int startup_frames_logged;
+	bool calibrated_this_hold;
 
 	AutoSFFilter()
 		: context(nullptr), sf_source_ref(nullptr),
@@ -30,7 +31,8 @@ struct AutoSFFilter {
 		  activate_time(0),
 		  texrender(nullptr), combined_effect(nullptr),
 		  in_render(false), media_has_reset(false),
-		  startup_frames_logged(0) {}
+		  startup_frames_logged(0), calibrated_this_hold(false) {}
+
 
 	~AutoSFFilter() {
 		if (sf_source_ref) obs_weak_source_release(sf_source_ref);
