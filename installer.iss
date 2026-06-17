@@ -60,20 +60,6 @@ begin
   end;
 end;
 
-function InitializeSetup(): Boolean;
-begin
-  Result := True;
-  // Check if OBS is running
-  while IsModuleLoaded('obs64.exe') do
-  begin
-    if MsgBox('OBS Studio is currently running. Please close OBS before continuing with the installation.', mbConfirmation, MB_RETRYCANCEL) = IDCANCEL then
-    begin
-      Result := False;
-      Exit;
-    end;
-  end;
-end;
-
 // Helper to check if a process is running
 function IsModuleLoaded(const ModuleName: String): Boolean;
 var
@@ -91,3 +77,18 @@ begin
   except
   end;
 end;
+
+function InitializeSetup(): Boolean;
+begin
+  Result := True;
+  // Check if OBS is running
+  while IsModuleLoaded('obs64.exe') do
+  begin
+    if MsgBox('OBS Studio is currently running. Please close OBS before continuing with the installation.', mbConfirmation, MB_RETRYCANCEL) = IDCANCEL then
+    begin
+      Result := False;
+      Exit;
+    end;
+  end;
+end;
+
