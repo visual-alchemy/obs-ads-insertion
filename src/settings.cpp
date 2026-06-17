@@ -15,6 +15,12 @@ void settings_load(FilterSettings *s, obs_data_t *data)
 	s->out_duration_ms = (int)obs_data_get_int(data, "out_duration_ms");
 	s->render_sf_overlay = obs_data_get_bool(data, "render_sf_overlay");
 	s->preview_squeezed = obs_data_get_bool(data, "preview_squeezed");
+
+	s->cached_bbox_min_x = (int)obs_data_get_int(data, "bbox_min_x");
+	s->cached_bbox_min_y = (int)obs_data_get_int(data, "bbox_min_y");
+	s->cached_bbox_max_x = (int)obs_data_get_int(data, "bbox_max_x");
+	s->cached_bbox_max_y = (int)obs_data_get_int(data, "bbox_max_y");
+	s->cached_bbox_valid = obs_data_get_bool(data, "bbox_valid");
 }
 
 void settings_save(FilterSettings *s, obs_data_t *data)

@@ -262,6 +262,11 @@ static bool do_recalc(AutoSFFilter *f, bool force)
 
 	if (!bb.valid) return true;
 	f->bbox = bb;
+	f->settings.cached_bbox_min_x = f->bbox.min_x;
+	f->settings.cached_bbox_min_y = f->bbox.min_y;
+	f->settings.cached_bbox_max_x = f->bbox.max_x;
+	f->settings.cached_bbox_max_y = f->bbox.max_y;
+	f->settings.cached_bbox_valid = true;
 
 	// Save the detected bounding box to the settings so it persists and loads on activation
 	obs_data_t *settings = obs_source_get_settings(f->context);
