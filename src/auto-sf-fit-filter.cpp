@@ -187,6 +187,19 @@ static obs_properties_t *filter_get_properties(void *data)
 					  }
 					  return true;
 				  });
+
+	char *ghost_path = obs_module_file("ghost.png");
+	std::string info_text = "Make with ❤️ by ";
+	if (ghost_path) {
+		std::string path_str = ghost_path;
+		std::replace(path_str.begin(), path_str.end(), '\\', '/');
+		info_text += "<img src=\"file:///" + path_str + "\" width=\"14\" height=\"14\"> ";
+		bfree(ghost_path);
+	}
+	info_text += "<a href=\"https://github.com/visual-alchemy/obs-ads-insertion\">visual-alchemy</a>";
+
+	obs_properties_add_text(p, "credit_info", info_text.c_str(), OBS_TEXT_INFO);
+
 	return p;
 }
 
