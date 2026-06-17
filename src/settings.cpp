@@ -15,6 +15,8 @@ void settings_load(FilterSettings *s, obs_data_t *data)
 	s->out_duration_ms = (int)obs_data_get_int(data, "out_duration_ms");
 	s->render_sf_overlay = obs_data_get_bool(data, "render_sf_overlay");
 	s->preview_squeezed = obs_data_get_bool(data, "preview_squeezed");
+	s->sf_anim_mode = static_cast<SFAnimMode>(obs_data_get_int(data, "sf_anim_mode"));
+	s->slide_dir = static_cast<SlideDir>(obs_data_get_int(data, "slide_dir"));
 
 	s->cached_bbox_min_x = (int)obs_data_get_int(data, "bbox_min_x");
 	s->cached_bbox_min_y = (int)obs_data_get_int(data, "bbox_min_y");
@@ -38,6 +40,8 @@ void settings_save(FilterSettings *s, obs_data_t *data)
 	obs_data_set_int(data, "out_duration_ms", s->out_duration_ms);
 	obs_data_set_bool(data, "render_sf_overlay", s->render_sf_overlay);
 	obs_data_set_bool(data, "preview_squeezed", s->preview_squeezed);
+	obs_data_set_int(data, "sf_anim_mode", static_cast<long long>(s->sf_anim_mode));
+	obs_data_set_int(data, "slide_dir", static_cast<long long>(s->slide_dir));
 
 	obs_data_set_int(data, "bbox_min_x", s->cached_bbox_min_x);
 	obs_data_set_int(data, "bbox_min_y", s->cached_bbox_min_y);
@@ -62,6 +66,8 @@ void settings_defaults(obs_data_t *data)
 	obs_data_set_default_int(data, "out_duration_ms", 1000);
 	obs_data_set_default_bool(data, "render_sf_overlay", true);
 	obs_data_set_default_bool(data, "preview_squeezed", false);
+	obs_data_set_default_int(data, "sf_anim_mode", static_cast<long long>(SFAnimMode::SCALE_SLIDE));
+	obs_data_set_default_int(data, "slide_dir", static_cast<long long>(SlideDir::LEFT));
 
 	obs_data_set_default_int(data, "bbox_min_x", 0);
 	obs_data_set_default_int(data, "bbox_min_y", 0);
@@ -84,7 +90,6 @@ static bool prop_source_filter(void *data, obs_source_t *source)
 
 obs_properties_t *settings_properties(FilterSettings *s)
 {
-	UNUSED_PARAMETER(s);
 	obs_properties_t *props = obs_properties_create();
 
 	obs_property_t *p = obs_properties_add_list(props, "sf_source",
@@ -133,6 +138,46 @@ obs_properties_t *settings_properties(FilterSettings *s)
 	obs_properties_add_int(props, "out_duration_ms",
 			       obs_module_text("OutDurationMs"), 0, 10000, 100);
 
+	obs_property_t *anim_mode = obs_properties_add_list(props, "sf_anim_mode",
+							     obs_module_text("SFAnimMode"),
+							     OBS_COMBO_TYPE_LIST,
+							     OBS_COMBO_FORMAT_INT);
+	obs_property_list_add_int(anim_mode, obs_module_text("SFAnimMode.Static"),
+				  static_cast<long long>(SFAnimMode::STATIC));
+	obs_property_list_add_int(anim_mode, obs_module_text("SFAnimMode.Slide"),
+				  static_cast<long long>(SFAnimMode::SLIDE));
+	obs_property_list_add_int(anim_mode, obs_module_text("SFAnimMode.ScaleSlide"),
+				  static_cast<long long>(SFAnimMode::SCALE_SLIDE));
+
+	obs_property_t *slide_dir = obs_properties_add_list(props, "slide_dir",
+							     obs_module_text("SlideDir"),
+							     OBS_COMBO_TYPE_LIST,
+							     OBS_COMBO_FORMAT_INT);
+	obs_property_list_add_int(slide_dir, obs_module_text("SlideDir.Left"),
+				  static_cast<long long>(SlideDir::LEFT));
+	obs_property_list_add_int(slide_dir, obs_module_text("SlideDir.Right"),
+				  static_cast<long long>(SlideDir::RIGHT));
+	obs_property_list_add_int(slide_dir, obs_module_text("SlideDir.Top"),
+				  static_cast<long long>(SlideDir::TOP));
+	obs_property_list_add_int(slide_dir, obs_module_text("SlideDir.Bottom"),
+				  static_cast<long long>(SlideDir::BOTTOM));
+
+	obs_property_set_modified_callback(anim_mode, [](obs_properties_t *props, obs_property_t *, obs_data_t *data) {
+		SFAnimMode mode = static_cast<SFAnimMode>(obs_data_get_int(data, "sf_anim_mode"));
+		obs_property_t *p_slide_dir = obs_properties_get(props, "slide_dir");
+		if (p_slide_dir) {
+			obs_property_set_visible(p_slide_dir, mode == SFAnimMode::SLIDE);
+		}
+		return true;
+	});
+
+	if (s) {
+		obs_property_t *p_slide_dir = obs_properties_get(props, "slide_dir");
+		if (p_slide_dir) {
+			obs_property_set_visible(p_slide_dir, s->sf_anim_mode == SFAnimMode::SLIDE);
+		}
+	}
+
 	obs_properties_add_bool(props, "debug_enabled",
 				obs_module_text("DebugEnabled"));
 
@@ -143,3 +188,4 @@ obs_properties_t *settings_properties(FilterSettings *s)
 
 	return props;
 }
+

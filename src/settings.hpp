@@ -14,6 +14,19 @@ enum class RecalcMode {
 	PERIODIC
 };
 
+enum class SFAnimMode {
+	STATIC,
+	SLIDE,
+	SCALE_SLIDE
+};
+
+enum class SlideDir {
+	LEFT,
+	RIGHT,
+	TOP,
+	BOTTOM
+};
+
 struct FilterSettings {
 	std::string sf_source_name;
 	FitMode fit_mode;
@@ -28,6 +41,8 @@ struct FilterSettings {
 	int out_duration_ms;
 	bool render_sf_overlay;
 	bool preview_squeezed;
+	SFAnimMode sf_anim_mode;
+	SlideDir slide_dir;
 
 	int cached_bbox_min_x;
 	int cached_bbox_min_y;
@@ -48,6 +63,8 @@ struct FilterSettings {
 		  out_duration_ms(1000),
 		  render_sf_overlay(true),
 		  preview_squeezed(false),
+		  sf_anim_mode(SFAnimMode::SCALE_SLIDE),
+		  slide_dir(SlideDir::LEFT),
 		  cached_bbox_min_x(0),
 		  cached_bbox_min_y(0),
 		  cached_bbox_max_x(0),
@@ -61,3 +78,4 @@ void settings_load(FilterSettings *s, obs_data_t *data);
 void settings_save(FilterSettings *s, obs_data_t *data);
 void settings_defaults(obs_data_t *data);
 obs_properties_t *settings_properties(FilterSettings *s);
+

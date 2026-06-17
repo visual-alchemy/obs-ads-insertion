@@ -61,6 +61,16 @@ Mengontrol kapan plugin memindai ulang sumber Squeeze Frame untuk mengkalibrasi 
 * **Hold Duration (ms)**: Waktu video tetap tertahan di dalam area bingkai transparan (default `8000ms`).
 * **Out Duration (ms)**: Waktu yang dibutuhkan video langsung untuk melebar kembali ke layar penuh dan SF untuk bergerak keluar layar (default `1000ms`).
 
+### SF Animation Mode (Mode Animasi SF)
+Mengontrol bagaimana overlay Squeeze Frame dianimasikan selama transisi berlangsung:
+* **Static (No Animation) / Statis**: Squeeze Frame dirender pada skala konstan 1:1 dan pergeseran 0. Frame tidak akan bergerak sama sekali. Mode ini sangat ideal jika video Squeeze Frame Anda sudah memiliki animasi transisi bawaan (baked-in) di dalam file video itu sendiri.
+* **Slide Only / Geser Saja**: Squeeze Frame dipertahankan pada skala konstan 1:1 (mencegah terjadinya distorsi rasio aspek) dan bergerak menggeser masuk/keluar layar sesuai dengan arah yang ditentukan pada pengaturan **Slide Direction**.
+* **Scale & Slide (Lockstep) / Skala & Geser**: Squeeze Frame dan video langsung menyusut/menggeser secara sinkron (lockstep) untuk memastikan tidak ada celah tepi. Perlu dicatat bahwa mode ini akan sedikit mengubah skala grafis dari Squeeze Frame selama transisi.
+
+### Slide Direction (Arah Geser)
+* **Pilihan**: Kiri (Left), Kanan (Right), Atas (Top), Bawah (Bottom).
+* **Fungsi**: Menentukan arah asal masuknya overlay Squeeze Frame ke layar. Hanya aktif jika *SF Animation Mode* diatur ke *Slide Only*.
+
 ### Show Debug Bounding Box (Tampilkan Kotak Debug)
 * **Fungsi**: Menggambar garis tepi berwarna hijau di sekitar area transparan terdeteksi.
 * **Penggunaan**: Aktifkan opsi ini sementara selama pengaturan awal untuk memastikan area cutout terpindai dengan benar, lalu matikan untuk produksi siaran langsung.

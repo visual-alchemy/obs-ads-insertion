@@ -385,6 +385,10 @@ static void get_transform(AutoSFFilter *f, float cx, float cy,
 	float O_start_x = -tox * S_start_x;
 	float O_start_y = -toy * S_start_y;
 
+	float r = 0.0f;
+	bool is_out = false;
+	TimingPhase current_phase = TimingPhase::IDLE;
+
 	// Use media sync if valid media duration is present and we've reset
 	if (duration > 0 && media_time >= 0 && f->media_has_reset) {
 		float in_dur = (float)f->settings.in_duration_ms;
@@ -402,10 +406,6 @@ static void get_transform(AutoSFFilter *f, float cx, float cy,
 				out_dur = 0.0f;
 			}
 		}
-
-		float r = 0.0f;
-		bool is_out = false;
-		TimingPhase current_phase = TimingPhase::IDLE;
 
 		if ((float)media_time <= in_dur) {
 			current_phase = TimingPhase::IN;
@@ -436,80 +436,117 @@ static void get_transform(AutoSFFilter *f, float cx, float cy,
 			blog(LOG_INFO, "[AutoSFFit] Media-sync Phase transitioned from %d to %d at media_time=%lld ms (dur=%lld)", (int)f->phase, (int)current_phase, media_time, duration);
 			f->phase = current_phase;
 		}
-
-		if (current_phase == TimingPhase::HOLD) {
-			sx = tx; sy = ty; ox = tox; oy = toy;
-			sf_ox = 0.0f; sf_oy = 0.0f;
-			sf_sx = 1.0f; sf_sy = 1.0f;
-		} else {
-			float S_x = is_out ? lin(1.0f, S_start_x, r) : lin(S_start_x, 1.0f, r);
-			float S_y = is_out ? lin(1.0f, S_start_y, r) : lin(S_start_y, 1.0f, r);
-			float O_x = is_out ? lin(0.0f, O_start_x, r) : lin(O_start_x, 0.0f, r);
-			float O_y = is_out ? lin(0.0f, O_start_y, r) : lin(O_start_y, 0.0f, r);
-
-			sf_sx = S_x; sf_sy = S_y;
-			sf_ox = O_x; sf_oy = O_y;
-			sx = S_x * tx; sy = S_y * ty;
-			ox = O_x + tox * S_x; oy = O_y + toy * S_y;
+	} else {
+		// Fallback to system-clock sync
+		if (f->phase == TimingPhase::IDLE || f->phase_start_time == 0) {
+			sx = sy = 1.0f;
+			ox = oy = 0.0f;
+			sf_opacity = 0.0f;
+			sf_sx = 1.0f;
+			sf_sy = 1.0f;
+			sf_ox = 0.0f;
+			sf_oy = 0.0f;
+			return;
 		}
-		return;
+
+		advance_phase(f);
+		current_phase = f->phase;
+
+		if (f->phase == TimingPhase::IDLE) {
+			sf_opacity = 0.0f;
+			sf_sx = 1.0f;
+			sf_sy = 1.0f;
+			sf_ox = 0.0f;
+			sf_oy = 0.0f;
+			return;
+		}
+
+		float in = (float)f->settings.in_duration_ms;
+		float out = (float)f->settings.out_duration_ms;
+
+		uint64_t now = obs_get_video_frame_time();
+		float el = (float)(now - f->phase_start_time) / 1000000.0f;
+
+		switch (f->phase) {
+		case TimingPhase::IN:
+			r = (in > 0) ? ease_out(el / in) : 1.0f;
+			is_out = false;
+			sf_opacity = 1.0f;
+			break;
+		case TimingPhase::HOLD:
+			r = 1.0f;
+			is_out = false;
+			sf_opacity = 1.0f;
+			break;
+		case TimingPhase::OUT:
+			r = (out > 0) ? ease_in(el / out) : 1.0f;
+			is_out = true;
+			sf_opacity = 1.0f;
+			break;
+		default: break;
+		}
 	}
 
-	// Fallback to system-clock sync
-	if (f->phase == TimingPhase::IDLE || f->phase_start_time == 0) {
+	if (current_phase == TimingPhase::IDLE) {
 		sx = sy = 1.0f;
 		ox = oy = 0.0f;
 		sf_opacity = 0.0f;
-		sf_sx = S_start_x;
-		sf_sy = S_start_y;
-		sf_ox = O_start_x;
-		sf_oy = O_start_y;
+		sf_sx = 1.0f;
+		sf_sy = 1.0f;
+		sf_ox = 0.0f;
+		sf_oy = 0.0f;
 		return;
 	}
 
-	advance_phase(f);
-	if (f->phase == TimingPhase::IDLE) {
-		sf_opacity = 0.0f;
-		sf_sx = S_start_x;
-		sf_sy = S_start_y;
-		sf_ox = O_start_x;
-		sf_oy = O_start_y;
-		return;
-	}
-
-	float in = (float)f->settings.in_duration_ms;
-	float out = (float)f->settings.out_duration_ms;
-
-	uint64_t now = obs_get_video_frame_time();
-	float el = (float)(now - f->phase_start_time) / 1000000.0f;
-
-	float r = 0.0f;
-	bool is_out = false;
-
-	switch (f->phase) {
-	case TimingPhase::IN:
-		r = (in > 0) ? ease_out(el / in) : 1.0f;
-		is_out = false;
-		sf_opacity = 1.0f;
-		break;
-	case TimingPhase::HOLD:
-		r = 1.0f;
-		is_out = false;
-		sf_opacity = 1.0f;
-		break;
-	case TimingPhase::OUT:
-		r = (out > 0) ? ease_in(el / out) : 1.0f;
-		is_out = true;
-		sf_opacity = 1.0f;
-		break;
-	default: break;
-	}
-
-	if (f->phase == TimingPhase::HOLD) {
+	if (current_phase == TimingPhase::HOLD) {
 		sx = tx; sy = ty; ox = tox; oy = toy;
 		sf_ox = 0.0f; sf_oy = 0.0f;
 		sf_sx = 1.0f; sf_sy = 1.0f;
+		return;
+	}
+
+	// Animate transition phases (IN/OUT)
+	if (f->settings.sf_anim_mode == SFAnimMode::STATIC) {
+		sf_sx = 1.0f;
+		sf_sy = 1.0f;
+		sf_ox = 0.0f;
+		sf_oy = 0.0f;
+
+		sx = is_out ? lin(tx, 1.0f, r) : lin(1.0f, tx, r);
+		ox = is_out ? lin(tox, 0.0f, r) : lin(0.0f, tox, r);
+		sy = is_out ? lin(ty, 1.0f, r) : lin(1.0f, ty, r);
+		oy = is_out ? lin(toy, 0.0f, r) : lin(0.0f, toy, r);
+	} else if (f->settings.sf_anim_mode == SFAnimMode::SLIDE) {
+		sf_sx = 1.0f;
+		sf_sy = 1.0f;
+
+		float sf_ox_start = 0.0f;
+		float sf_oy_start = 0.0f;
+
+		switch (f->settings.slide_dir) {
+		case SlideDir::LEFT:
+			sf_ox_start = -cx;
+			break;
+		case SlideDir::RIGHT:
+			sf_ox_start = cx;
+			break;
+		case SlideDir::TOP:
+			sf_oy_start = -cy;
+			break;
+		case SlideDir::BOTTOM:
+			sf_oy_start = cy;
+			break;
+		}
+
+		sf_ox = is_out ? lin(0.0f, sf_ox_start, r) : lin(sf_ox_start, 0.0f, r);
+		sf_oy = is_out ? lin(0.0f, sf_oy_start, r) : lin(sf_oy_start, 0.0f, r);
+
+		sx = is_out ? lin(tx, 1.0f, r) : lin(1.0f, tx, r);
+		ox = is_out ? lin(tox, 0.0f, r) : lin(0.0f, tox, r);
+		sy = is_out ? lin(ty, 1.0f, r) : lin(1.0f, ty, r);
+		oy = is_out ? lin(toy, 0.0f, r) : lin(0.0f, toy, r);
 	} else {
+		// SCALE_SLIDE (Lockstep)
 		float S_x = is_out ? lin(1.0f, S_start_x, r) : lin(S_start_x, 1.0f, r);
 		float S_y = is_out ? lin(1.0f, S_start_y, r) : lin(S_start_y, 1.0f, r);
 		float O_x = is_out ? lin(0.0f, O_start_x, r) : lin(O_start_x, 0.0f, r);

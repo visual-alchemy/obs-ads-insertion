@@ -61,6 +61,16 @@ Controls when the plugin scans the Squeeze Frame to calibrate the cutout:
 * **Hold Duration (ms)**: The time the video remains squeezed in the cutout (default `8000ms`).
 * **Out Duration (ms)**: The time it takes for the live video to expand back to full screen and the SF to exit (default `1000ms`).
 
+### SF Animation Mode
+Controls how the Squeeze Frame overlay animates during the transition:
+* **Static (No Animation)**: The Squeeze Frame is rendered at a constant 1:1 scale and 0 offset. It does not move. This is ideal if your Squeeze Frame video already has a transition animation built into the video file itself.
+* **Slide Only**: The Squeeze Frame remains at a constant 1:1 scale (preventing any aspect ratio distortion) and slides on/off-screen in the direction specified by the **Slide Direction** setting.
+* **Scale & Slide (Lockstep)**: The Squeeze Frame and the live video scale and shift in lockstep to guarantee zero edge gaps. Note that this mode will scale the Squeeze Frame graphics slightly.
+
+### Slide Direction
+* **Options**: Left, Right, Top, Bottom.
+* **What it does**: Specifies the direction from which the Squeeze Frame slides onto the screen. Only active when *SF Animation Mode* is set to *Slide Only*.
+
 ### Show Debug Bounding Box
 * **What it does**: Draws a green border around the detected cutout area.
 * **Usage**: Turn this on temporarily during setup to verify that the cutout is scanned correctly, then turn it off for production.
