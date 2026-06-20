@@ -4,6 +4,12 @@ A native C++ filter plugin for OBS Studio on Windows that automatically fits a l
 
 ---
 
+## Project M.I.D.A.S.
+* **Acronym**: Media Insertion & Dynamic Auto-scaling System.
+* **Philosophy**: King Midas is known for his ability to turn everything he touches into gold. This name is perfect for the context of "Ads Insertion" or advertisements, which are essentially money-making (gold-making) engines for broadcasting. Additionally, the term "Auto-scaling" represents its core feature of automatically resizing the Squeeze Frame.
+
+---
+
 ## 🚀 Key Features
 
 * **Alpha-Based Cutout Scan**: Automatically scans the Squeeze Frame source's alpha transparency channel on the fly to detect the target placement box.
